@@ -63,4 +63,8 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(BlogPost::class, 'saved_posts', 'user_id', 'blog_post_id');
     }
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
 }

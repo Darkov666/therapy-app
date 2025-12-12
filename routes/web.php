@@ -57,6 +57,17 @@ Route::get('/booking/{appointment}/accept-signed', [BookingController::class, 'a
 
 Route::get('/downloads/{token}', [App\Http\Controllers\DownloadsController::class, 'index'])->name('downloads.index');
 
+Route::middleware([
+    'auth',
+    'verified',
+])->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard', [
+            'appointments' => Auth::user()->appointments()->with('service')->latest()->get()
+        ]);
+    })->name('dashboard');
+});
+
 Route::get('/login', function () {
     return Inertia::render('Auth/Login'); // Placeholder
 })->name('login');
