@@ -65,11 +65,36 @@ Route::middleware([
     'auth',
     'verified',
 ])->group(function () {
+    // Client Dashboard (Default)
     Route::get('/dashboard', function () {
+        $user = Auth::user();
+        if ($user->role === 'admin')
+            return redirect()->route('admin.dashboard');
+        if ($user->role === 'titular')
+            return redirect()->route('titular.dashboard');
+
         return Inertia::render('Dashboard', [
-            'appointments' => Auth::user()->appointments()->with('service')->latest()->get()
+            'appointments' => $user->appointments()->with('service')->latest()->get()
         ]);
     })->name('dashboard');
+
+    // Admin Routes
+    Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
+        Route::resource('users', App\Http\Controllers\Admin\UserController::class);
+    });
+
+    // Titular Routes
+    Route::middleware(['role:titular'])->prefix('titular')->name('titular.')->group(function () {
+        Route::get('/dashboard', function () {
+            return Inertia::render('Titular/Dashboard'); })->name('dashboard');
+    });
+
+    // Secure Media Route
+    Route::get('/media/secure', [App\Http\Controllers\MediaController::class, 'serve'])
+        ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]) // Usually GET is safe, but explicit is good
+        ->middleware('signed')
+        ->name('media.secure');
 });
 
 Route::get('/login', function () {

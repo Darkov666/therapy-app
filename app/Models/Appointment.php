@@ -28,6 +28,7 @@ class Appointment extends Model
         'session_type',
         'organization_type',
         'organization_other',
+        'psychologist_id',
     ];
 
     protected $casts = [
@@ -47,5 +48,10 @@ class Appointment extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function psychologist()
+    {
+        return $this->belongsTo(User::class, 'psychologist_id');
     }
 }
