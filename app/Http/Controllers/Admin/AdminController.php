@@ -20,12 +20,9 @@ class AdminController extends Controller
             'pending_appointments' => Appointment::where('status', 'pending')->count(),
             'confirmed_appointments' => Appointment::where('status', 'confirmed')->count(),
             'total_sales' => Appointment::where('payment_status', 'paid')->count(),
-            'top_psychologists' => Appointment::select('psychologist_id', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
-                ->whereNotNull('psychologist_id')
-                ->where('status', 'confirmed')
-                ->groupBy('psychologist_id')
-                ->with('psychologist')
-                ->orderByDesc('total')
+            'top_psychologists' => User::where('role', 'psychologist')
+                ->withCount('appointments')
+                ->orderByDesc('appointments_count')
                 ->take(5)
                 ->get(),
         ];
@@ -39,7 +36,7 @@ class AdminController extends Controller
     public function users()
     {
         return Inertia::render('Admin/Users/Index', [
-            'users' => User::whereIn('role', ['admin', 'titular'])->get()
+            'users' => User::whereIn('role', ['admin', 'psychologist'])->get()
         ]);
     }
 

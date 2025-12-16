@@ -24,8 +24,14 @@ class BookingController extends Controller
         if ($request->has('service_id')) {
             $service = Service::find($request->service_id);
         }
+
+        $psychologists = User::whereIn('role', ['admin', 'psychologist'])
+            ->select('id', 'name', 'profile_photo_path')
+            ->get();
+
         return Inertia::render('Booking/IndividualForm', [
-            'service' => $service
+            'service' => $service,
+            'psychologists' => $psychologists
         ]);
     }
 
@@ -35,8 +41,14 @@ class BookingController extends Controller
         if ($request->has('service_id')) {
             $service = Service::find($request->service_id);
         }
+
+        $psychologists = User::whereIn('role', ['admin', 'psychologist'])
+            ->select('id', 'name', 'profile_photo_path')
+            ->get();
+
         return Inertia::render('Booking/GroupForm', [
-            'service' => $service
+            'service' => $service,
+            'psychologists' => $psychologists
         ]);
     }
 
@@ -51,6 +63,7 @@ class BookingController extends Controller
             'session_type' => 'required|in:online,in_person',
             'photo' => 'required|image|max:2048', // Mandatory
             'service_id' => 'nullable|exists:services,id',
+            'psychologist_id' => 'nullable|exists:users,id',
         ]);
 
         $user = User::firstOrCreate(
@@ -77,6 +90,7 @@ class BookingController extends Controller
         $appointment = Appointment::create([
             'user_id' => $user->id,
             'service_id' => $validated['service_id'] ?? 1,
+            'psychologist_id' => $validated['psychologist_id'] ?? null,
             'scheduled_at' => now()->addDay()->setHour(10)->setMinute(0),
             'end_time' => now()->addDay()->setHour(11)->setMinute(0),
             'status' => 'pending',
@@ -112,6 +126,7 @@ class BookingController extends Controller
             'participants.*.name' => 'required|string',
             'participants.*.surname' => 'required|string',
             'participants.*.gender' => 'required|string',
+            'psychologist_id' => 'nullable|exists:users,id',
         ]);
 
         $user = User::firstOrCreate(
@@ -138,6 +153,7 @@ class BookingController extends Controller
         $appointment = Appointment::create([
             'user_id' => $user->id,
             'service_id' => $validated['service_id'] ?? 1,
+            'psychologist_id' => $validated['psychologist_id'] ?? null,
             'scheduled_at' => now()->addDay()->setHour(10)->setMinute(0), // Temporary
             'end_time' => now()->addDay()->setHour(11)->setMinute(0),
             'status' => 'pending',
@@ -157,8 +173,14 @@ class BookingController extends Controller
         if ($request->has('service_id')) {
             $service = Service::find($request->service_id);
         }
+
+        $psychologists = User::whereIn('role', ['admin', 'psychologist'])
+            ->select('id', 'name', 'profile_photo_path')
+            ->get();
+
         return Inertia::render('Booking/SpecialForm', [
-            'service' => $service
+            'service' => $service,
+            'psychologists' => $psychologists
         ]);
     }
 
@@ -173,6 +195,7 @@ class BookingController extends Controller
             'photo' => 'nullable|image|max:2048',
             'service_id' => 'nullable|exists:services,id',
             'notes' => 'required|string|max:1000', // Requirements
+            'psychologist_id' => 'nullable|exists:users,id',
         ]);
 
         $user = User::firstOrCreate(
@@ -199,6 +222,7 @@ class BookingController extends Controller
         $appointment = Appointment::create([
             'user_id' => $user->id,
             'service_id' => $validated['service_id'] ?? 1,
+            'psychologist_id' => $validated['psychologist_id'] ?? null,
             'scheduled_at' => now()->addDay()->setHour(10)->setMinute(0),
             'end_time' => now()->addDay()->setHour(11)->setMinute(0),
             'status' => 'pending',

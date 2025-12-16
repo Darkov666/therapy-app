@@ -8,6 +8,10 @@ import Swal from 'sweetalert2';
 
 const props = defineProps({
     service: Object,
+    psychologists: {
+        type: Array,
+        default: () => []
+    }
 });
 
 const t = wTrans;
@@ -23,7 +27,12 @@ const form = useForm({
     organization_other: '',
     photo: null,
     service_id: props.service?.id || null,
+    psychologist_id: null,
 });
+
+if (props.psychologists.length === 1) {
+    form.psychologist_id = props.psychologists[0].id;
+}
 
 const handlePhotoCapture = (dataUrl) => {
     photoPreview.value = dataUrl;
@@ -168,6 +177,22 @@ const submit = () => {
                                 </div>
                             </div>
                             
+                            <!-- Psychologist Selection -->
+                            <div v-if="psychologists.length > 0" class="mb-6">
+                                <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
+                                    {{ t('booking.psychologist') || 'Psicólogo' }}
+                                </label>
+                                <select v-model="form.psychologist_id" class="w-full rounded-lg border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white focus:border-primary-500 focus:ring-primary-500 mb-2">
+                                    <option :value="null" disabled>Selecciona un profesional</option>
+                                    <option v-for="psych in psychologists" :key="psych.id" :value="psych.id">
+                                        {{ psych.name }}
+                                    </option>
+                                </select>
+                                 <p v-if="psychologists.length === 1" class="text-xs text-secondary-500 italic">
+                                    * Profesional asignado automáticamente.
+                                </p>
+                            </div>
+
                             <!-- Organization Fields -->
                             <div class="border-t border-gray-200 dark:border-secondary-700 pt-6">
                                 <h3 class="text-lg font-medium text-secondary-900 dark:text-white mb-4">Información de la Organización</h3>

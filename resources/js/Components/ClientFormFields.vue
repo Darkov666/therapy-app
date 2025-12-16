@@ -8,12 +8,21 @@ const props = defineProps({
     isDigitalOnly: {
         type: Boolean,
         default: false
+    },
+    psychologists: {
+        type: Array,
+        default: () => []
     }
 });
 
 const t = wTrans;
 const photoPreview = ref(null);
 const showCamera = ref(false);
+
+// Auto-select if only one psychologist
+if (props.psychologists && props.psychologists.length === 1) {
+    props.form.psychologist_id = props.psychologists[0].id;
+}
 
 const handlePhotoCapture = (dataUrl) => {
     photoPreview.value = dataUrl;
@@ -96,6 +105,21 @@ const handleFileUpload = (event) => {
                 <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">{{ t('booking.phone') }} <span class="text-xs text-gray-500">({{ t('general.optional') || 'Opcional' }})</span></label>
                 <input v-model="form.phone" type="tel" class="w-full rounded-lg border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white focus:border-primary-500 focus:ring-primary-500" />
             </div>
+        </div>
+
+        <div v-if="!isDigitalOnly && psychologists.length > 0">
+            <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
+                {{ t('booking.psychologist') || 'Psicólogo' }}
+            </label>
+            <select v-model="form.psychologist_id" class="w-full rounded-lg border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white focus:border-primary-500 focus:ring-primary-500 mb-2">
+                <option :value="null" disabled>Selecciona un profesional</option>
+                <option v-for="psych in psychologists" :key="psych.id" :value="psych.id">
+                    {{ psych.name }}
+                </option>
+            </select>
+             <p v-if="psychologists.length === 1" class="text-xs text-secondary-500 italic">
+                * Profesional asignado automáticamente.
+            </p>
         </div>
 
         <!-- Session Type -->

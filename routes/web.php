@@ -85,9 +85,10 @@ Route::middleware([
     });
 
     // Titular Routes
-    Route::middleware(['role:titular'])->prefix('titular')->name('titular.')->group(function () {
+    Route::middleware(['auth', 'verified', 'role:titular|psychologist'])->prefix('titular')->group(function () {
         Route::get('/dashboard', function () {
-            return Inertia::render('Titular/Dashboard'); })->name('dashboard');
+            return Inertia::render('Titular/Dashboard');
+        })->name('titular.dashboard');
     });
 
     // Secure Media Route
