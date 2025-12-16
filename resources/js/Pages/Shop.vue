@@ -6,7 +6,10 @@ import ServiceCard from '@/Components/ServiceCard.vue';
 import { wTrans } from 'laravel-vue-i18n';
 
 const props = defineProps({
-    // In a real app, products would come from the backend
+    products: {
+        type: Array,
+        default: () => []
+    }
 });
 
 const selectedCategory = ref('all');
@@ -18,61 +21,11 @@ const categories = [
     { id: 'manual', name: 'shop.manuals' },
 ];
 
-// Mock Data
-const products = [
-    {
-        id: 101,
-        title: 'Guía de Ansiedad',
-        description: 'Un eBook completo para entender y manejar la ansiedad en el día a día.',
-        price: 299,
-        currency: 'MXN',
-        type: 'ebook',
-        image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop'
-    },
-    {
-        id: 102,
-        title: 'Masterclass: Autoestima',
-        description: 'Video curso de 2 horas sobre cómo construir una autoestima sólida.',
-        price: 599,
-        currency: 'MXN',
-        type: 'video',
-        image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800&auto=format&fit=crop',
-        video_url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDN6eW56eW56eW56eW56eW56eW56eW56eW56eW56eW56eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKr3nzbh5WgCFxe/giphy.gif'
-    },
-    {
-        id: 103,
-        title: 'Manual de Terapia Cognitiva',
-        description: 'Manual técnico para estudiantes y profesionales de la salud mental.',
-        price: 450,
-        currency: 'MXN',
-        type: 'manual',
-        image: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=800&auto=format&fit=crop'
-    },
-    {
-        id: 104,
-        title: 'Meditaciones Guiadas',
-        description: 'Pack de 10 videos con meditaciones para dormir y relajarse.',
-        price: 350,
-        currency: 'MXN',
-        type: 'video',
-        image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop'
-    },
-    {
-        id: 105,
-        title: 'Diario de Gratitud',
-        description: 'eBook interactivo para practicar la gratitud diariamente.',
-        price: 150,
-        currency: 'MXN',
-        type: 'ebook',
-        image: 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?q=80&w=800&auto=format&fit=crop'
-    }
-];
-
 const filteredProducts = computed(() => {
     if (selectedCategory.value === 'all') {
-        return products;
+        return props.products;
     }
-    return products.filter(product => product.type === selectedCategory.value);
+    return props.products.filter(product => product.type === selectedCategory.value);
 });
 </script>
 

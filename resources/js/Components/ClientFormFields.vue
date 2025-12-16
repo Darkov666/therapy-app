@@ -5,6 +5,10 @@ import CameraModal from '@/Components/CameraModal.vue';
 
 const props = defineProps({
     form: Object,
+    isDigitalOnly: {
+        type: Boolean,
+        default: false
+    }
 });
 
 const t = wTrans;
@@ -38,7 +42,7 @@ const handleFileUpload = (event) => {
 <template>
     <div class="space-y-6">
         <!-- Photo Section -->
-        <div class="space-y-4">
+        <div v-if="!isDigitalOnly" class="space-y-4">
             <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300">
                 {{ t('booking.profile_photo') || 'Foto de Perfil' }}
             </label>
@@ -89,13 +93,13 @@ const handleFileUpload = (event) => {
                 <input v-model="form.email" type="email" required class="w-full rounded-lg border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white focus:border-primary-500 focus:ring-primary-500" />
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">{{ t('booking.phone') }}</label>
-                <input v-model="form.phone" type="tel" required class="w-full rounded-lg border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white focus:border-primary-500 focus:ring-primary-500" />
+                <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">{{ t('booking.phone') }} <span class="text-xs text-gray-500">({{ t('general.optional') || 'Opcional' }})</span></label>
+                <input v-model="form.phone" type="tel" class="w-full rounded-lg border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white focus:border-primary-500 focus:ring-primary-500" />
             </div>
         </div>
 
         <!-- Session Type -->
-        <div>
+        <div v-if="!isDigitalOnly">
             <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">{{ t('booking.session_type') || 'Tipo de Sesión' }}</label>
             <div class="flex space-x-4 mt-2">
                 <label class="inline-flex items-center">
@@ -110,7 +114,7 @@ const handleFileUpload = (event) => {
         </div>
 
         <!-- Gender -->
-        <div>
+        <div v-if="!isDigitalOnly">
             <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">{{ t('booking.gender') }}</label>
             <select v-model="form.gender" required class="w-full rounded-lg border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white focus:border-primary-500 focus:ring-primary-500 mb-2">
                 <option value="">{{ t('booking.select_gender') }}</option>

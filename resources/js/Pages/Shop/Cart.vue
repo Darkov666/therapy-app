@@ -50,16 +50,11 @@ const total = computed(() => {
     return props.cart?.items.reduce((sum, item) => sum + (item.service.price_mxn * item.quantity), 0) || 0;
 });
 
-const proceedToCheckout = () => {
+const checkoutUrl = computed(() => {
     // Check if any item requires scheduling
-    const needsScheduling = props.cart?.items.some(item => item.service.requires_scheduling);
-
-    if (needsScheduling) {
-        router.visit(route('scheduling.index'));
-    } else {
-        router.visit(route('checkout.index'));
-    }
-};
+    const needsScheduling = props.cart?.items ? props.cart.items.some(item => item.service.requires_scheduling) : false;
+    return needsScheduling ? '/scheduling' : '/checkout';
+});
 </script>
 
 <template>
@@ -107,9 +102,9 @@ const proceedToCheckout = () => {
                                 <span>Total</span>
                                 <span>{{ formatPrice(total) }}</span>
                             </div>
-                            <button @click="proceedToCheckout" class="w-full py-3 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition shadow-lg">
+                            <a :href="checkoutUrl" class="block w-full text-center py-3 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition shadow-lg">
                                 Proceder con el registro
-                            </button>
+                            </a>
                             <Link href="/services" class="block text-center mt-4 text-primary-600 hover:text-primary-700 font-medium">
                                 Seguir comprando
                             </Link>

@@ -9,7 +9,7 @@ const selectedCategory = ref('all');
 const categories = [
     { id: 'all', name: 'shop.all' },
     { id: 'individual', name: 'gallery.individual' },
-    { id: 'couples', name: 'services.couples' },
+    { id: 'couple', name: 'services.couples' },
     { id: 'family', name: 'services.family' },
     { id: 'workshops', name: 'gallery.workshops' },
 ];

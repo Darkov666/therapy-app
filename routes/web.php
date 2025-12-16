@@ -20,7 +20,11 @@ Route::get('/', function () {
 });
 
 Route::get('/shop', function () {
-    return Inertia::render('Shop');
+    return Inertia::render('Shop', [
+        'products' => Service::whereIn('type', ['ebook', 'video', 'manual', 'audio'])
+            ->where('is_active', true)
+            ->get()
+    ]);
 });
 
 Route::get('/services', function () {

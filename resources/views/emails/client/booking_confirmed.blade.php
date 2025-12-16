@@ -7,29 +7,39 @@
 
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #2c3e50;">¡Tu Reserva está Confirmada!</h2>
+        <h2 style="color: #2c3e50;">
+            {{ $appointment->scheduled_at ? '¡Tu Reserva está Confirmada!' : '¡Tu Compra está Confirmada!' }}
+        </h2>
 
         <p>Hola {{ $appointment->customer_name }},</p>
-        <p>Nos complace informarte que tu cita ha sido confirmada exitosamente.</p>
+        <p>
+            {{ $appointment->scheduled_at ? 'Nos complace informarte que tu cita ha sido confirmada exitosamente.' : 'Nos complace informarte que tu compra ha sido confirmada exitosamente.' }}
+        </p>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #c8e6c9;">
-            <h3 style="margin-top: 0; color: #2e7d32;">Detalles de la Cita:</h3>
+            <h3 style="margin-top: 0; color: #2e7d32;">
+                {{ $appointment->scheduled_at ? 'Detalles de la Cita:' : 'Detalles de la Compra:' }}
+            </h3>
             <p><strong>Folio:</strong> {{ $appointment->folio }}</p>
-            <p><strong>Servicio:</strong> {{ $appointment->service->title }}</p>
-            <p><strong>Fecha:</strong> {{ \Carbon\Carbon::parse($appointment->scheduled_at)->format('d/m/Y') }}</p>
-            <p><strong>Hora de inicio:</strong> {{ \Carbon\Carbon::parse($appointment->scheduled_at)->format('H:i') }}
-            </p>
-            <p><strong>Hora de finalización:</strong> {{ \Carbon\Carbon::parse($appointment->end_time)->format('H:i') }}
-            </p>
-            <p><strong>Tipo de Sesión:</strong> {{ $appointment->session_type === 'online' ? 'Online' : 'Presencial' }}
-            </p>
+            <p><strong>{{ $appointment->scheduled_at ? 'Servicio:' : 'Producto:' }}</strong>
+                {{ $appointment->service->title }}</p>
 
-            @if($appointment->session_type === 'online')
-                <p><strong>Link de Reunión:</strong> <a href="{{ $appointment->google_event_id ?? '#' }}">Unirse con Google
-                        Meet</a></p>
-            @else
-                <p><strong>Ubicación:</strong> Consultorio Principal, Av. Reforma 123, CDMX. <a
-                        href="https://maps.google.com/?q=Consultorio+Principal+Av.+Reforma+123+CDMX">Ver en Mapa</a></p>
+            @if($appointment->scheduled_at)
+                <p><strong>Fecha:</strong> {{ \Carbon\Carbon::parse($appointment->scheduled_at)->format('d/m/Y') }}</p>
+                <p><strong>Hora de inicio:</strong> {{ \Carbon\Carbon::parse($appointment->scheduled_at)->format('H:i') }}
+                </p>
+                <p><strong>Hora de finalización:</strong> {{ \Carbon\Carbon::parse($appointment->end_time)->format('H:i') }}
+                </p>
+                <p><strong>Tipo de Sesión:</strong> {{ $appointment->session_type === 'online' ? 'Online' : 'Presencial' }}
+                </p>
+
+                @if($appointment->session_type === 'online')
+                    <p><strong>Link de Reunión:</strong> <a href="{{ $appointment->google_event_id ?? '#' }}">Unirse con Google
+                            Meet</a></p>
+                @else
+                    <p><strong>Ubicación:</strong> Consultorio Principal, Av. Reforma 123, CDMX. <a
+                            href="https://maps.google.com/?q=Consultorio+Principal+Av.+Reforma+123+CDMX">Ver en Mapa</a></p>
+                @endif
             @endif
         </div>
 

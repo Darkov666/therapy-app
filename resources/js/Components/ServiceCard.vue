@@ -1,9 +1,10 @@
 <script setup>
 import { computed } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import { useCartStore } from '@/Stores/cart';
 import { wTrans } from 'laravel-vue-i18n';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const props = defineProps({
     service: {
@@ -47,7 +48,49 @@ const addToCart = async () => {
     }
 };
 
-const bookNow = () => {
+const page = usePage();
+const cartCount = computed(() => page.props.cartCount);
+
+const bookNow = async () => {
+    if (props.isProduct) {
+        // Direct Buy Logic check
+        if (cartCount.value > 0) {
+            Swal.fire({
+                title: 'Tienes artículos en tu carrito',
+                text: '¿Quieres comprar solo este artículo ahora o prefieres agregarlo al carrito?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#757575',
+                confirmButtonText: 'Comprar Ahora (Solo este)',
+                cancelButtonText: 'Agregar al Carrito',
+                showCloseButton: true,
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    // Direct Buy: Redirect with direct_service_id
+                    window.location.href = `/checkout?direct_service_id=${props.service.id}`;
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    // Add to Cart
+                    await addToCart();
+                }
+            });
+            return;
+        }
+
+        // Standard flow (Cart empty)
+        try {
+            await axios.post('/cart/add', {
+                service_id: props.service.id,
+                quantity: 1
+            });
+             window.location.href = '/checkout';
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            alert('Error al procesar la compra.');
+        }
+        return;
+    }
+
     const title = props.service.title.toLowerCase();
     const type = props.service.type;
     let route = '/booking/individual';
@@ -121,7 +164,7 @@ const bookSpecial = () => {
                     
                     <div class="flex gap-2">
                         <button 
-                            v-if="!isSpecial && !isProduct && !['workshop', 'conference', 'talk', 'training'].includes(service.type)"
+                            v-if="!isSpecial && !['workshop', 'conference', 'talk', 'training'].includes(service.type)"
                             @click="addToCart"
                             class="flex-1 px-3 py-2 border border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50 transition font-medium text-sm text-center"
                         >

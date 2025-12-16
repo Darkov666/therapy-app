@@ -7,15 +7,19 @@
 
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
     <div style="max-w-600px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #2c3e50;">Tu Reserva está Pendiente</h2>
+        <h2 style="color: #2c3e50;">
+            {{ $appointment->scheduled_at ? 'Tu Reserva está Pendiente' : 'Tu Compra está Pendiente' }}
+        </h2>
 
         <p>Hola {{ $appointment->customer_name }},</p>
         @if(in_array($appointment->service->type, ['workshop', 'conference', 'talk', 'training']))
             <p>Hemos recibido tu solicitud de reserva para el taller/conferencia. Esta cita requiere aprobación del
                 psicólogo.</p>
         @else
-            <p>Hemos recibido tu solicitud de reserva. Para confirmarla, por favor realiza el pago mediante transferencia
-                bancaria.</p>
+            <p>
+                Hemos recibido tu solicitud de {{ $appointment->scheduled_at ? 'reserva' : 'compra' }}.
+                Para confirmarla, por favor realiza el pago mediante transferencia bancaria.
+            </p>
 
             <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
                 <h3 style="margin-top: 0;">Datos Bancarios:</h3>

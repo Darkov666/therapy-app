@@ -9,6 +9,7 @@ import Swal from 'sweetalert2';
 const props = defineProps({
     cart: Object,
     appointments: Object, // { item_id: { date, time } }
+    directServiceId: [String, Number], // Optional prop for direct buy
 });
 
 const t = wTrans;
@@ -22,10 +23,16 @@ const form = useForm({
     custom_gender: '',
     photo: null,
     session_type: 'online',
+    direct_service_id: props.directServiceId, // include in form
 });
 
 const total = computed(() => {
     return props.cart?.items.reduce((sum, item) => sum + (item.service.price_mxn * item.quantity), 0) || 0;
+});
+
+const isDigitalOnly = computed(() => {
+    if (!props.cart?.items) return false;
+    return !props.cart.items.some(item => item.service.requires_scheduling);
 });
 
 const formatPrice = (price) => {
@@ -40,7 +47,7 @@ const submit = () => {
         form.gender = form.custom_gender;
     }
 
-    if (!form.gender) {
+    if (!isDigitalOnly.value && !form.gender) {
         Swal.fire({
             icon: 'warning',
             title: t('booking.missing_gender') || 'Género requerido',
@@ -51,8 +58,8 @@ const submit = () => {
     }
 
     const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(form.phone)) {
-        Swal.fire({
+    if (form.phone && !phoneRegex.test(form.phone)) { // Optional check
+         Swal.fire({
             icon: 'warning',
             title: t('booking.invalid_phone') || 'Teléfono inválido',
             text: t('booking.invalid_phone_desc') || 'El teléfono debe tener 10 dígitos numéricos.',
@@ -61,30 +68,8 @@ const submit = () => {
         return;
     }
 
-    if (!form.photo && !props.cart.user_id) { // Only require photo if not logged in (or we could require it always to update)
-       // Actually, requirements say "recabar la misma informacion", implying always.
-       // But if user is logged in, they might already have a photo.
-       // Let's assume we require it if it's a new registration or purely consistent with IndividualForm.
-       // IndividualForm requires it. I'll require it here too for consistency, unless user is logged in?
-       // Let's make it required if !user. If user exists, we assume they have one or we don't block.
-       // Wait, the form fields are shown only if !user in the original code? 
-       // Original had `v-if="!$page.props.auth.user"`. I should keep that check? 
-       // User said "recabar la misma informacion que recabamos cuando comprasmo en booknow".
-       // If I am logged in, `IndividualForm` might pre-fill?
-       // Let's check IndividualForm. It doesn't seem to have v-if user check for fields. It asks everyone.
-       // So I should ask everyone.
-       // BUT, checking the original Checkout.vue again...
-       // Line 72: `<div v-if="!$page.props.auth.user"` implies it only asked guests.
-       // I should probably remove that v-if and ask everyone if we want to be consistent with "Booking" flow which asks for specific details for *this* appointment?
-       // Actually, Booking flow (IndividualForm) creates a NEW user or updates?
-       // It seems to post to `booking.store`.
-       // Let's remove the `v-if="!$page.props.auth.user"` to force data collection as per request "recabar la misma informacion".
-    }
-    
-    // Explicit check on photo
-    if (!form.photo && !props.auth?.user?.profile_photo_path) {
-         // If we strictly follow "recabar la misma informacion", we need photo.
-         // Let's enforce it if form.photo is empty.
+    // Explicit check on photo (skipped if digital-only)
+    if (!isDigitalOnly.value && !form.photo && !props.auth?.user?.profile_photo_path) {
          Swal.fire({
             icon: 'warning',
             title: t('booking.photo_required') || 'Foto requerida',
@@ -93,13 +78,67 @@ const submit = () => {
         });
         return;
     }
+    
+    // Auto-fill dummy values for backend validation if digital only
+    if (isDigitalOnly.value) {
+        form.gender = 'other';
+        form.custom_gender = 'N/A';
+        form.session_type = 'online';
+    }
 
+    if (form.payment_method === 'transfer') {
+        Swal.fire({
+            icon: 'info',
+            title: 'Pago por Transferencia',
+            text: 'Ten en cuenta que tu descarga no estará lista hasta que el pago haya sido procesado y verificado.',
+            showCancelButton: true,
+            confirmButtonText: 'Entendido, continuar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#E99FA0',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                submitForm();
+            }
+        });
+    } else {
+        submitForm();
+    }
+};
+
+const submitForm = () => {
     form.post(route('checkout.store'), {
         forceFormData: true,
         onSuccess: () => {
             // Redirect handled by backend
         }
     });
+}
+
+const updateQuantity = async (item, change) => {
+    // Optimistic UI or wait for reload? Simple reload for now or inertia visit
+    if (change > 0) {
+        // Add logic (Reuse cart.add)
+         await axios.post(route('cart.add'), {
+            service_id: item.service.id,
+            quantity: 1
+        });
+        window.location.reload();
+    } else {
+        // Remove logic (Reuse cart.remove if quantity is 1? Or just decrement?)
+        // Assuming cart.update is not implemented or cart.add handles it?
+        // Let's use cart.remove logic if needed, or if we have an update endpoint
+        // Checking routes: Route::patch('/cart/update/{cartItem}', [CartController::class, 'update'])
+        
+        let newQuantity = item.quantity + change;
+        if (newQuantity < 1) newQuantity = 1; // Don't allow 0 here, use delete button instead if exists, or allow delete?
+        
+        // Use proper update route
+         router.patch(route('cart.update', item.id), {
+            quantity: newQuantity
+        }, {
+             preserveScroll: true,
+        });
+    }
 };
 </script>
 
@@ -119,11 +158,19 @@ const submit = () => {
                             <h3 class="text-lg font-semibold text-primary-800 dark:text-primary-200 mb-4">{{ t('booking.summary') }}</h3>
                             <div class="space-y-2 text-secondary-700 dark:text-secondary-300">
                                 <div v-for="item in cart.items" :key="item.id" class="flex flex-col border-b border-gray-100 dark:border-secondary-600 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0">
-                                    <div class="flex justify-between">
-                                        <span>{{ item.quantity }}x {{ item.service.title }}</span>
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex items-center gap-2">
+                                            <!-- Quantity Controls -->
+                                            <div class="flex items-center border border-gray-300 rounded-lg bg-white overflow-hidden">
+                                                <button @click="item.quantity > 1 ? updateQuantity(item, -1) : null" :class="{'opacity-50 cursor-not-allowed': item.quantity <= 1}" class="px-2 py-1 hover:bg-gray-100 text-gray-600">-</button>
+                                                <span class="px-2 py-1 text-sm font-medium">{{ item.quantity }}</span>
+                                                <button @click="updateQuantity(item, 1)" class="px-2 py-1 hover:bg-gray-100 text-gray-600">+</button>
+                                            </div>
+                                            <span>x {{ item.service.title }}</span>
+                                        </div>
                                         <span class="font-medium">{{ formatPrice(item.service.price_mxn * item.quantity) }}</span>
                                     </div>
-                                    <div v-if="appointments && appointments[item.id]" class="text-sm text-primary-600 dark:text-primary-400 mt-1">
+                                    <div v-if="appointments && appointments[item.id]" class="text-sm text-primary-600 dark:text-primary-400 mt-1 pl-20">
                                         📅 {{ appointments[item.id].date }} a las {{ appointments[item.id].time }}
                                     </div>
                                 </div>
@@ -135,10 +182,9 @@ const submit = () => {
                         </div>
 
                         <!-- Registration / Contact Info -->
-                        <!-- Display for everyone to ensure data collection -->
                          <div class="bg-gray-50 dark:bg-secondary-700 p-6 rounded-lg mb-8">
                             <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-4">{{ t('Contact Information') }}</h3>
-                            <ClientFormFields :form="form" />
+                            <ClientFormFields :form="form" :is-digital-only="isDigitalOnly" />
                         </div>
 
                         <form @submit.prevent="submit" class="space-y-6">

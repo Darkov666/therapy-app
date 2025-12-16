@@ -357,7 +357,7 @@ class BookingController extends Controller
         // Send Confirmation Email
         Mail::to($appointment->customer_email)->send(new \App\Mail\ReservationConfirmedClientNotification($appointment));
 
-        return back()->with('success', 'Reserva aceptada y cliente notificado.');
+        return view('booking.approval_success');
     }
 
     public function acceptReservationSigned(Request $request, Appointment $appointment)

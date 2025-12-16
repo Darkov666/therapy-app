@@ -46,18 +46,21 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2>Nuevas Reservas Recibidas</h2>
-            <p>Se han realizado múltiples reservas en una sola orden.</p>
+            <h2>Nuevas Reservas / Compras Recibidas</h2>
+            <p>Se han realizado múltiples transacciones en una sola orden.</p>
         </div>
 
         @foreach($appointments as $appointment)
             <div class="appointment">
-                <h3>{{ $appointment->service->title }}</h3>
+                <h3>{{ $appointment->service->title }} ({{ $appointment->scheduled_at ? 'Reserva' : 'Compra' }})</h3>
                 <p><strong>Cliente:</strong> {{ $appointment->customer_name }}</p>
                 <p><strong>Email:</strong> {{ $appointment->customer_email }}</p>
                 <p><strong>Teléfono:</strong> {{ $appointment->customer_phone }}</p>
 
-                @if($appointment->scheduled_at)
+                @if($appointment->service->downloadable)
+                    <p><strong>Tipo:</strong> Producto Digital (Descargable)</p>
+                    <p><strong>Estado:</strong> Pendiente de Pago/Aprobación</p>
+                @elseif($appointment->scheduled_at)
                     <p><strong>Fecha Solicitada:</strong>
                         {{ \Carbon\Carbon::parse($appointment->scheduled_at)->format('d/m/Y H:i') }}</p>
                     <p><strong>Tipo:</strong> {{ ucfirst($appointment->session_type) }}</p>
@@ -70,14 +73,17 @@
                             @endforeach
                         </ul>
                     @endif
-
-                    <div style="margin-top: 15px;">
-                        <a href="{{ route('booking.accept.signed', $appointment->id) }}" class="btn">Aceptar Reserva</a>
-                    </div>
                 @else
                     <p><strong>Estado:</strong> Fecha Pendiente (Open Date)</p>
                     <p>El cliente seleccionará la fecha desde su panel.</p>
                 @endif
+
+                <div style="margin-top: 15px;">
+                    <a href="{{ \Illuminate\Support\Facades\URL::signedRoute('booking.accept.signed', $appointment->id) }}"
+                        class="btn">
+                        {{ $appointment->service->downloadable ? 'Autorizar Envío' : 'Aceptar Reserva' }}
+                    </a>
+                </div>
             </div>
         @endforeach
     </div>

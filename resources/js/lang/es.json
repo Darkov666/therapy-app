@@ -46,7 +46,10 @@
         "individual": "Terapia Individual",
         "group": "Terapia en Grupo",
         "workshops": "Talleres",
-        "conferences": "Conferencias"
+        "conferences": "Conferencias",
+        "trainings": "Capacitaciones",
+        "talks": "Pláticas",
+        "presentations": "Ponencias"
     },
     "blog": {
         "title": "Lo Último del Blog",

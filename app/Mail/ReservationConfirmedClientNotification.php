@@ -20,7 +20,19 @@ class ReservationConfirmedClientNotification extends Mailable
 
     public function build()
     {
-        return $this->subject('Reserva Confirmada - ' . $this->appointment->service->title)
+        $email = $this->subject('Reserva Confirmada - ' . $this->appointment->service->title)
             ->view('emails.client.booking_confirmed');
+
+        if ($this->appointment->service->downloadable) {
+            $filePath = $this->appointment->service->file_path;
+            if (file_exists($filePath)) {
+                $email->attach($filePath, [
+                    'as' => $this->appointment->service->title . '.pdf',
+                    'mime' => 'application/pdf',
+                ]);
+            }
+        }
+
+        return $email;
     }
 }
