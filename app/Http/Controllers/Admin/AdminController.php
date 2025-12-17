@@ -21,8 +21,12 @@ class AdminController extends Controller
             'confirmed_appointments' => Appointment::where('status', 'confirmed')->count(),
             'total_sales' => Appointment::where('payment_status', 'paid')->count(),
             'top_psychologists' => User::where('role', 'psychologist')
-                ->withCount('appointments')
-                ->orderByDesc('appointments_count')
+                ->withCount([
+                    'psychologistAppointments as total' => function ($query) {
+                        $query->where('status', 'confirmed');
+                    }
+                ])
+                ->orderByDesc('total')
                 ->take(5)
                 ->get(),
         ];

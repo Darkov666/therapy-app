@@ -95,9 +95,9 @@ const formatCurrency = (value) => {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-secondary-100 dark:divide-secondary-800">
-                            <tr v-for="item in metrics.top_psychologists" :key="item.psychologist_id">
+                            <tr v-for="item in metrics.top_psychologists" :key="item.id">
                                 <td class="px-3 py-3 whitespace-nowrap text-sm text-secondary-700 dark:text-secondary-300">
-                                    {{ item.psychologist ? item.psychologist.name : 'Desconocido' }}
+                                    {{ item.name }}
                                 </td>
                                 <td class="px-3 py-3 whitespace-nowrap text-sm text-right font-bold text-primary-600">
                                     {{ item.total }}

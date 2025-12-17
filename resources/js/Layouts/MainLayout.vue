@@ -1,14 +1,17 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import { loadLanguageAsync } from 'laravel-vue-i18n';
+import { loadLanguageAsync, wTrans } from 'laravel-vue-i18n';
 import CartIcon from '@/Components/CartIcon.vue';
 import CurrencyToggle from '@/Components/CurrencyToggle.vue';
 import FloatingWhatsApp from '@/Components/FloatingWhatsApp.vue';
 
+const t = wTrans;
+
 const showingNavigationDropdown = ref(false);
 const isDark = ref(false);
 const currentLang = ref('es');
+const showingUserDropdown = ref(false);
 
 const toggleDarkMode = () => {
     isDark.value = !isDark.value;
@@ -44,6 +47,13 @@ onMounted(async () => {
     // Check for saved language preference
     const savedLang = localStorage.getItem('locale') || 'es';
     changeLanguage(savedLang);
+
+    document.addEventListener('click', (e) => {
+        const dropdown = document.querySelector('.user-dropdown-container');
+        if (dropdown && !dropdown.contains(e.target)) {
+            showingUserDropdown.value = false;
+        }
+    });
 
     // Migrate local cart to backend
     const cartStore = useCartStore();
@@ -152,17 +162,57 @@ watch(() => page.props.flash, (flash) => {
                             </svg>
                         </button>
 
-                        <!-- Register Link -->
-                        <Link href="/register" class="text-sm font-bold text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 transition hidden lg:block">
-                            {{ $t('nav.register') }}
-                        </Link>
 
-                        <!-- Login Icon -->
-                        <Link href="/login" class="p-2 rounded-full text-secondary-500 hover:bg-primary-50 dark:hover:bg-secondary-800 transition focus:outline-none" :title="$t('nav.login')">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                        </Link>
+
+// ... existing code ...
+
+                        <!-- Authenticated Dropdown -->
+                        <div v-if="$page.props.auth.user" class="ml-3 relative user-dropdown-container">
+                             <div>
+                                <button 
+                                    @click="showingUserDropdown = !showingUserDropdown"
+                                    class="flex items-center text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-secondary-300 transition"
+                                >
+                                    <img class="h-10 w-10 rounded-full object-cover" :src="$page.props.auth.user.profile_photo_url" :alt="$page.props.auth.user.name" />
+                                </button>
+                                
+                                <div 
+                                    v-show="showingUserDropdown"
+                                    class="absolute right-0 w-48 mt-2 origin-top-right bg-white dark:bg-secondary-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50 transition ease-in-out duration-150"
+                                >
+                                    <div class="py-1">
+                                        <div class="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-secondary-700">
+                                            {{ $page.props.auth.user.name }}
+                                        </div>
+                                        <Link href="/profile" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-secondary-700">
+                                            {{ t('Profile') || 'Perfil' }}
+                                        </Link>
+                                         <Link href="/dashboard" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-secondary-700">
+                                            {{ t('Dashboard') || 'Tablero' }}
+                                        </Link>
+                                        <div class="border-t border-gray-100 dark:border-secondary-700"></div>
+                                        <Link :href="route('logout')" method="post" as="button" class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-secondary-700">
+                                            {{ t('Log Out') || 'Cerrar Sesión' }}
+                                        </Link>
+                                    </div>
+                                </div>
+                             </div>
+                        </div>
+
+                        <!-- Guest Links -->
+                        <div v-else class="flex items-center space-x-3">
+                             <!-- Register Link -->
+                            <Link href="/register" class="text-sm font-bold text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 transition hidden lg:block">
+                                {{ $t('nav.register') }}
+                            </Link>
+
+                            <!-- Login Icon -->
+                            <Link href="/login" class="p-2 rounded-full text-secondary-500 hover:bg-primary-50 dark:hover:bg-secondary-800 transition focus:outline-none" :title="$t('nav.login')">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </Link>
+                        </div>
                     </div>
 
                     <!-- Hamburger -->

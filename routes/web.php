@@ -64,13 +64,18 @@ Route::get('/downloads/{token}', [App\Http\Controllers\DownloadsController::clas
 Route::middleware([
     'auth',
     'verified',
+    'approved',
 ])->group(function () {
+    Route::get('/approval-pending', function () {
+        return Inertia::render('Auth/ApprovalNotice');
+    })->name('approval.notice')->withoutMiddleware(['approved']);
+
     // Client Dashboard (Default)
     Route::get('/dashboard', function () {
         $user = Auth::user();
         if ($user->role === 'admin')
             return redirect()->route('admin.dashboard');
-        if ($user->role === 'titular')
+        if ($user->role === 'titular' || $user->role === 'psychologist')
             return redirect()->route('titular.dashboard');
 
         return Inertia::render('Dashboard', [
@@ -78,10 +83,21 @@ Route::middleware([
         ]);
     })->name('dashboard');
 
+    // Profile Routes
+    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::delete('/profile/sessions', [App\Http\Controllers\ProfileController::class, 'destroySessions'])->name('profile.sessions.destroy');
+
     // Admin Routes
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
+
+        // Settings
+        Route::get('/settings', [App\Http\Controllers\Admin\AdminController::class, 'settings'])->name('settings');
+        Route::put('/settings', [App\Http\Controllers\Admin\AdminController::class, 'updateSettings'])->name('settings.update');
+
+        // User Management
         Route::resource('users', App\Http\Controllers\Admin\UserController::class);
+        Route::put('users/{user}/approve', [App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.approve');
     });
 
     // Titular Routes
@@ -98,13 +114,7 @@ Route::middleware([
         ->name('media.secure');
 });
 
-Route::get('/login', function () {
-    return Inertia::render('Auth/Login'); // Placeholder
-})->name('login');
-
-Route::get('/register', function () {
-    return Inertia::render('Auth/Register'); // Placeholder
-})->name('register');
+// Auth routes are handled by Jetstream/Fortify
 
 // Workshop Routes
 Route::get('/workshops', [App\Http\Controllers\WorkshopController::class, 'index'])->name('workshops.index');

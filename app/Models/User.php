@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, \Illuminate\Database\Eloquent\SoftDeletes;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable, \Illuminate\Database\Eloquent\SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -19,12 +20,15 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'nickname',
         'email',
         'password',
         'role',
         'phone',
+        'specialty',
         'gender',
         'profile_photo_path',
+        'is_approved',
     ];
 
     /**
@@ -49,6 +53,22 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    protected $appends = [
+        'profile_photo_url',
+    ];
+
+    /**
+     * Get the default profile photo URL if no photo has been uploaded.
+     *
+     * @return string
+     */
+    public function getProfilePhotoUrlAttribute()
+    {
+        return $this->profile_photo_path
+            ? '/storage/' . $this->profile_photo_path
+            : 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
+    }
+
     public function comments()
     {
         return $this->hasMany(Comment::class);
@@ -63,8 +83,14 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(BlogPost::class, 'saved_posts', 'user_id', 'blog_post_id');
     }
+
     public function appointments()
     {
         return $this->hasMany(Appointment::class);
+    }
+
+    public function psychologistAppointments()
+    {
+        return $this->hasMany(Appointment::class, 'psychologist_id');
     }
 }
