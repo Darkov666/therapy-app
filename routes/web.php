@@ -21,7 +21,11 @@ Route::get('/', function () {
 
 Route::get('/shop', function () {
     return Inertia::render('Shop', [
-        'products' => Service::whereIn('type', ['ebook', 'video', 'manual', 'audio'])
+        'products' => \App\Models\Product::where('is_active', true)
+            ->with(['category', 'user']) // Eager load category and seller
+            ->latest()
+            ->get(),
+        'categories' => \App\Models\Category::where('type', 'product')
             ->where('is_active', true)
             ->get()
     ]);
@@ -31,6 +35,10 @@ Route::get('/services', function () {
     return Inertia::render('Services', [
         'services' => Service::where('is_active', true)
             ->whereIn('type', ['individual', 'couple', 'family', 'workshop', 'conference', 'talk', 'training'])
+            ->with('category')
+            ->get(),
+        'categories' => \App\Models\Category::where('type', 'service')
+            ->where('is_active', true)
             ->get()
     ]);
 });
@@ -71,12 +79,17 @@ Route::middleware([
     })->name('approval.notice')->withoutMiddleware(['approved']);
 
     // Client Dashboard (Default)
+    // Client Dashboard (Default)
     Route::get('/dashboard', function () {
         $user = Auth::user();
-        if ($user->role === 'admin')
+
+        if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
-        if ($user->role === 'titular' || $user->role === 'psychologist')
-            return redirect()->route('titular.dashboard');
+        }
+
+        if ($user->role === 'titular' || $user->role === 'psychologist') {
+            return redirect()->route('admin.dashboard');
+        }
 
         return Inertia::render('Dashboard', [
             'appointments' => $user->appointments()->with('service')->latest()->get()
@@ -88,28 +101,33 @@ Route::middleware([
     Route::delete('/profile/sessions', [App\Http\Controllers\ProfileController::class, 'destroySessions'])->name('profile.sessions.destroy');
 
     // Admin Routes
-    Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Admin Routes
+    Route::middleware(['role:admin|titular|psychologist'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
 
-        // Settings
-        Route::get('/settings', [App\Http\Controllers\Admin\AdminController::class, 'settings'])->name('settings');
-        Route::put('/settings', [App\Http\Controllers\Admin\AdminController::class, 'updateSettings'])->name('settings.update');
+        // Settings (Admin Only)
+        Route::middleware(['role:admin'])->group(function () {
+            Route::get('/settings', [App\Http\Controllers\Admin\AdminController::class, 'settings'])->name('settings');
+            Route::put('/settings', [App\Http\Controllers\Admin\AdminController::class, 'updateSettings'])->name('settings.update');
+            Route::put('users/{user}/approve', [App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.approve');
+        });
 
         // User Management
         Route::resource('users', App\Http\Controllers\Admin\UserController::class);
-        Route::put('users/{user}/approve', [App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.approve');
+
+        // Service Management
+        Route::resource('services', App\Http\Controllers\Admin\ServiceController::class);
+        Route::resource('products', App\Http\Controllers\Admin\ProductController::class);
+        Route::resource('categories', App\Http\Controllers\Admin\CategoryController::class)->except(['create', 'edit', 'show']);
     });
 
     // Titular Routes
     Route::middleware(['auth', 'verified', 'role:titular|psychologist'])->prefix('titular')->group(function () {
-        Route::get('/dashboard', function () {
-            return Inertia::render('Titular/Dashboard');
-        })->name('titular.dashboard');
+        Route::get('/dashboard', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('titular.dashboard');
     });
 
     // Secure Media Route
     Route::get('/media/secure', [App\Http\Controllers\MediaController::class, 'serve'])
-        ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]) // Usually GET is safe, but explicit is good
         ->middleware('signed')
         ->name('media.secure');
 });
@@ -139,6 +157,30 @@ Route::post('/scheduling', [App\Http\Controllers\SchedulingController::class, 's
 
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+
+// Contact Routes
+Route::get('/contact', [App\Http\Controllers\ContactController::class, 'index'])->name('contact.index');
+Route::post('/contact', [App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
+Route::middleware(['auth', 'verified'])->post('/contact/{message}/reply', [App\Http\Controllers\ContactController::class, 'reply'])->name('contact.reply');
+
+// User Messages Route (Profile)
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/profile/messages', function () {
+        return Inertia::render('Profile/Messages', [
+            'messages' => App\Models\ContactMessage::where('user_id', Auth::id())
+                ->whereNull('parent_id')
+                ->with('replies')
+                ->orderBy('created_at', 'desc')
+                ->get()
+        ]);
+    })->name('profile.messages');
+});
+
+// Admin Messages Routes
+Route::middleware(['auth', 'verified', 'role:admin|titular|psychologist'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('messages', App\Http\Controllers\Admin\MessageController::class)->only(['index', 'show']);
+    Route::post('messages/{message}/reply', [App\Http\Controllers\Admin\MessageController::class, 'store'])->name('messages.reply');
+});
 
 Route::get('/debug-data', function () {
     return ['services' => \App\Models\Service::all()];

@@ -10,6 +10,7 @@ import Swal from 'sweetalert2';
 const props = defineProps({
     users: Object,
     filters: Object,
+    can_create: Boolean, 
 });
 
 const t = wTrans;
@@ -74,6 +75,12 @@ const deleteUser = (user) => {
             <h2 class="text-xl font-bold">Listado de Usuarios</h2>
             
             <div class="flex space-x-4">
+                <Link :href="route('admin.users.create')" v-if="can_create" class="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Crear Usuario
+                </Link>
                 <input 
                     v-model="search" 
                     type="text" 

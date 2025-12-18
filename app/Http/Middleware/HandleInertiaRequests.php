@@ -56,6 +56,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn() => $request->session()->get('success'),
                 'error' => fn() => $request->session()->get('error'),
             ],
+            'categories' => fn() => \App\Models\Category::where('is_active', true)->select('id', 'name', 'slug')->get(),
         ];
     }
 }

@@ -9,23 +9,27 @@ const props = defineProps({
     products: {
         type: Array,
         default: () => []
+    },
+    categories: {
+        type: Array,
+        default: () => []
     }
 });
 
 const selectedCategory = ref('all');
 
-const categories = [
-    { id: 'all', name: 'shop.all' },
-    { id: 'ebook', name: 'shop.ebooks' },
-    { id: 'video', name: 'shop.videos' },
-    { id: 'manual', name: 'shop.manuals' },
-];
+const categoryList = computed(() => {
+    return [
+        { id: 'all', name: props.categories.length > 0 ? 'Todos' : 'Ver Todos' }, // Simple label, could use translation
+        ...props.categories
+    ];
+});
 
 const filteredProducts = computed(() => {
     if (selectedCategory.value === 'all') {
         return props.products;
     }
-    return props.products.filter(product => product.type === selectedCategory.value);
+    return props.products.filter(product => product.category_id === selectedCategory.value);
 });
 </script>
 
@@ -40,10 +44,9 @@ const filteredProducts = computed(() => {
                     <p class="text-lg text-secondary-600 dark:text-secondary-400">{{ $t('shop.subtitle') }}</p>
                 </div>
 
-                <!-- Category Filter -->
                 <div class="flex justify-center mb-10 space-x-2 sm:space-x-4 overflow-x-auto pb-4">
                     <button 
-                        v-for="category in categories" 
+                        v-for="category in categoryList" 
                         :key="category.id"
                         @click="selectedCategory = category.id"
                         :class="[
@@ -53,7 +56,7 @@ const filteredProducts = computed(() => {
                                 : 'bg-white dark:bg-secondary-800 text-secondary-600 dark:text-secondary-300 hover:bg-primary-50 dark:hover:bg-secondary-700'
                         ]"
                     >
-                        {{ $t(category.name) }}
+                        {{ category.id === 'all' ? $t('shop.all') : category.name }}
                     </button>
                 </div>
 

@@ -122,9 +122,23 @@ watch(() => page.props.flash, (flash) => {
                             <Link href="/" :class="{'border-primary-500 text-secondary-900 dark:text-white': $page.url === '/', 'border-transparent text-secondary-500 dark:text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-200 hover:border-secondary-300': $page.url !== '/'}" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out">
                                 {{ $t('nav.home') }}
                             </Link>
-                            <Link href="/services" :class="{'border-primary-500 text-secondary-900 dark:text-white': $page.url.startsWith('/services'), 'border-transparent text-secondary-500 dark:text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-200 hover:border-secondary-300': !$page.url.startsWith('/services')}" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out">
-                                {{ $t('nav.services') }}
-                            </Link>
+
+                            <!-- Services Dropdown (Desktop) -->
+                            <div class="relative inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-secondary-300 transition duration-150 ease-in-out group cursor-pointer" :class="{'border-primary-500': $page.url.startsWith('/services')}">
+                                <Link href="/services" class="inline-flex items-center text-sm font-medium leading-5 text-secondary-500 dark:text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-200" :class="{'text-secondary-900 dark:text-white': $page.url.startsWith('/services')}">
+                                    {{ $t('nav.services') }}
+                                    <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                </Link>
+                                
+                                <div class="absolute left-0 top-full mt-1 w-48 bg-white dark:bg-secondary-800 rounded-md shadow-lg py-1 hidden group-hover:block z-50 ring-1 ring-black ring-opacity-5">
+                                    <Link href="/services" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-secondary-700">Ver Todos</Link>
+                                    <div class="border-t border-gray-100 dark:border-secondary-700"></div>
+                                    <Link v-for="category in $page.props.categories" :key="category.id" :href="'/services?category=' + category.slug" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-secondary-700">
+                                        {{ category.name }}
+                                    </Link>
+                                </div>
+                            </div>
+
                             <Link href="/shop" :class="{'border-primary-500 text-secondary-900 dark:text-white': $page.url.startsWith('/shop'), 'border-transparent text-secondary-500 dark:text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-200 hover:border-secondary-300': !$page.url.startsWith('/shop')}" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out">
                                 {{ $t('nav.shop') }}
                             </Link>
@@ -164,9 +178,9 @@ watch(() => page.props.flash, (flash) => {
 
 
 
-// ... existing code ...
+<!-- ... existing code ... 
 
-                        <!-- Authenticated Dropdown -->
+                             Authenticated Dropdown -->
                         <div v-if="$page.props.auth.user" class="ml-3 relative user-dropdown-container">
                              <div>
                                 <button 
@@ -186,6 +200,9 @@ watch(() => page.props.flash, (flash) => {
                                         </div>
                                         <Link href="/profile" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-secondary-700">
                                             {{ t('Profile') || 'Perfil' }}
+                                        </Link>
+                                        <Link :href="route('profile.messages')" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-secondary-700">
+                                            Mis Mensajes
                                         </Link>
                                          <Link href="/dashboard" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-secondary-700">
                                             {{ t('Dashboard') || 'Tablero' }}
@@ -231,27 +248,37 @@ watch(() => page.props.flash, (flash) => {
             <div :class="{'block': showingNavigationDropdown, 'hidden': !showingNavigationDropdown}" class="sm:hidden bg-white dark:bg-secondary-900 border-b border-secondary-200 dark:border-secondary-800">
                 <div class="pt-2 pb-3 space-y-1">
                     <Link href="/" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-white hover:bg-primary-50 dark:hover:bg-secondary-800 hover:border-primary-300 transition duration-150 ease-in-out">{{ $t('nav.home') }}</Link>
-                    <Link href="/services" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-white hover:bg-primary-50 dark:hover:bg-secondary-800 hover:border-primary-300 transition duration-150 ease-in-out">{{ $t('nav.services') }}</Link>
+                    
+                    <!-- Mobile Services -->
+                    <div>
+                        <div class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-secondary-600 dark:text-secondary-400">{{ $t('nav.services') }}</div>
+                         <Link href="/services" class="block pl-6 pr-4 py-2 text-sm font-medium text-secondary-500 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-white">Ver Todos</Link>
+                        <Link v-for="category in $page.props.categories" :key="category.id" :href="'/services?category=' + category.slug" class="block pl-6 pr-4 py-2 text-sm font-medium text-secondary-500 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-white">
+                            {{ category.name }}
+                        </Link>
+                    </div>
+
                     <Link href="/shop" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-white hover:bg-primary-50 dark:hover:bg-secondary-800 hover:border-primary-300 transition duration-150 ease-in-out">{{ $t('nav.shop') }}</Link>
                     <Link href="/blog" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-white hover:bg-primary-50 dark:hover:bg-secondary-800 hover:border-primary-300 transition duration-150 ease-in-out">{{ $t('nav.blog') }}</Link>
                     <Link href="/contact" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-white hover:bg-primary-50 dark:hover:bg-secondary-800 hover:border-primary-300 transition duration-150 ease-in-out">{{ $t('nav.contact') }}</Link>
                     <Link href="/register" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-white hover:bg-primary-50 dark:hover:bg-secondary-800 hover:border-primary-300 transition duration-150 ease-in-out">{{ $t('nav.register') }}</Link>
                     <Link href="/login" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-secondary-600 dark:text-secondary-400 hover:text-secondary-800 dark:hover:text-white hover:bg-primary-50 dark:hover:bg-secondary-800 hover:border-primary-300 transition duration-150 ease-in-out">{{ $t('nav.login') }}</Link>
                 </div>
-                <!-- Mobile Toggles -->
-                <div class="pt-4 pb-4 border-t border-secondary-200 dark:border-secondary-800 flex items-center justify-between px-4">
+                <!-- ... mobile toggle ... -->
+                 <div class="pt-4 pb-4 border-t border-secondary-200 dark:border-secondary-800 flex items-center justify-between px-4">
+                     <!-- ... existing ... -->
+                     <button @click="toggleDarkMode" class="text-secondary-500 dark:text-secondary-400">
+                        <span v-if="!isDark">Dark Mode</span>
+                        <span v-else>Light Mode</span>
+                    </button>
+                    <!-- Missing Language toggles in mobile were present in existing code, ensuring strict replacement -->
                      <div class="flex items-center space-x-4">
                         <button @click="changeLanguage('es')" :class="{'font-bold text-primary-600': currentLang === 'es'}" class="text-sm text-secondary-600 dark:text-secondary-400">ES</button>
                         <button @click="changeLanguage('en')" :class="{'font-bold text-primary-600': currentLang === 'en'}" class="text-sm text-secondary-600 dark:text-secondary-400">EN</button>
                     </div>
-                    <button @click="toggleDarkMode" class="text-secondary-500 dark:text-secondary-400">
-                        <span v-if="!isDark">Dark Mode</span>
-                        <span v-else>Light Mode</span>
-                    </button>
                 </div>
             </div>
         </nav>
-
         <!-- Page Content -->
         <main>
             <slot />

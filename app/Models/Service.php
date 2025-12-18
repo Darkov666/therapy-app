@@ -18,6 +18,8 @@ class Service extends Model
         'type',
         'is_active',
         'image',
+        'user_id',
+        'category_id',
     ];
 
     protected $casts = [
@@ -44,5 +46,20 @@ class Service extends Model
     {
         // For POC: Return dummy file path specific to type or generic
         return storage_path('app/public/dummy.pdf');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function psychologists()
+    {
+        return $this->belongsToMany(User::class, 'psychologist_service', 'service_id', 'psychologist_id');
     }
 }

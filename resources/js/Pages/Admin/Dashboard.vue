@@ -65,7 +65,7 @@ const formatCurrency = (value) => {
                 </div>
             </div>
 
-            <!-- Total Users -->
+            <!-- Total Users / My Patients -->
             <div class="bg-white dark:bg-secondary-900 overflow-hidden shadow-sm rounded-xl p-6 border border-primary-100 dark:border-secondary-800">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400">
@@ -74,7 +74,9 @@ const formatCurrency = (value) => {
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-secondary-500 dark:text-secondary-400">Usuarios Registrados</p>
+                        <p class="text-sm font-medium text-secondary-500 dark:text-secondary-400">
+                            {{ $page.props.auth.user.role === 'psychologist' ? 'Mis Pacientes' : 'Usuarios Registrados' }}
+                        </p>
                         <p class="text-2xl font-bold text-secondary-900 dark:text-white">{{ metrics.total_users }}</p>
                     </div>
                 </div>
@@ -83,8 +85,8 @@ const formatCurrency = (value) => {
 
         <!-- Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Top Psychologists -->
-             <div class="bg-white dark:bg-secondary-900 overflow-hidden shadow-sm rounded-xl p-6 border border-primary-100 dark:border-secondary-800">
+            <!-- Top Psychologists (Only for Admin) -->
+             <div v-if="$page.props.auth.user.role !== 'psychologist'" class="bg-white dark:bg-secondary-900 overflow-hidden shadow-sm rounded-xl p-6 border border-primary-100 dark:border-secondary-800">
                 <h3 class="text-lg font-bold text-secondary-900 dark:text-white mb-4">Top Psicólogos (Citas Confirmadas)</h3>
                 <div v-if="metrics.top_psychologists && metrics.top_psychologists.length > 0" class="overflow-x-auto">
                      <table class="min-w-full divide-y divide-secondary-200 dark:divide-secondary-700">

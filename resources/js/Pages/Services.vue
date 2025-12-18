@@ -4,34 +4,28 @@ import { Head } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import ServiceCard from '@/Components/ServiceCard.vue';
 
-const selectedCategory = ref('all');
-
-const categories = [
-    { id: 'all', name: 'shop.all' },
-    { id: 'individual', name: 'gallery.individual' },
-    { id: 'couple', name: 'services.couples' },
-    { id: 'family', name: 'services.family' },
-    { id: 'workshops', name: 'gallery.workshops' },
-];
-
 const props = defineProps({
-    services: Array
+    services: Array,
+    categories: {
+        type: Array,
+        default: () => []
+    }
 });
 
-// Mock Data removed - using props.services instead
+const selectedCategory = ref('all');
+
+const categoryList = computed(() => {
+    return [
+        { id: 'all', name: props.categories.length > 0 ? 'Todos' : 'Ver Todos' },
+        ...props.categories
+    ];
+});
 
 const filteredServices = computed(() => {
     if (selectedCategory.value === 'all') {
         return props.services;
     }
-    return props.services.filter(service => {
-        if (selectedCategory.value === 'workshops') {
-            return ['workshop', 'conference', 'talk', 'training'].includes(service.type);
-        }
-        
-        return service.type === selectedCategory.value || 
-               (service.title && service.title.toLowerCase().includes(selectedCategory.value));
-    });
+    return props.services.filter(service => service.category_id === selectedCategory.value);
 });
 </script>
 
@@ -46,10 +40,9 @@ const filteredServices = computed(() => {
                     <p class="text-lg text-secondary-600 dark:text-secondary-400">{{ $t('services.subtitle') }}</p>
                 </div>
 
-                <!-- Category Filter -->
                 <div class="flex justify-center mb-10 space-x-2 sm:space-x-4 overflow-x-auto pb-4">
                     <button 
-                        v-for="category in categories" 
+                        v-for="category in categoryList" 
                         :key="category.id"
                         @click="selectedCategory = category.id"
                         :class="[
@@ -59,7 +52,7 @@ const filteredServices = computed(() => {
                                 : 'bg-white dark:bg-secondary-800 text-secondary-600 dark:text-secondary-300 hover:bg-primary-50 dark:hover:bg-secondary-700'
                         ]"
                     >
-                        {{ $t(category.name) }}
+                        {{ category.id === 'all' ? $t('services.all', 'Todos') : category.name }}
                     </button>
                 </div>
 

@@ -93,4 +93,24 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Appointment::class, 'psychologist_id');
     }
+
+    public function authorizedServices()
+    {
+        return $this->belongsToMany(Service::class, 'psychologist_service', 'psychologist_id', 'service_id');
+    }
+
+    public function createdServices()
+    {
+        return $this->hasMany(Service::class, 'user_id');
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function myCreatedUsers()
+    {
+        return $this->hasMany(User::class, 'created_by');
+    }
 }

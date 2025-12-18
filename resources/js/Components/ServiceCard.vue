@@ -32,6 +32,10 @@ const currencySymbol = computed(() => {
     return cartStore.currency === 'MXN' ? 'MX$' : 'US$';
 });
 
+const displayImage = computed(() => {
+    return props.service.cover_url || props.service.image_url || props.service.image;
+});
+
 const addToCart = async () => {
     console.log('Adding to cart (axios):', props.service.id);
     try {
@@ -119,8 +123,8 @@ const bookSpecial = () => {
         <!-- Image or Video -->
         <div class="h-48 w-full overflow-hidden relative group">
             <img 
-                v-if="!service.video_url && service.image" 
-                :src="service.image" 
+                v-if="!service.video_url && displayImage" 
+                :src="displayImage" 
                 :alt="service.title" 
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />

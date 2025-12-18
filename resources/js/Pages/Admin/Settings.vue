@@ -19,6 +19,7 @@ const form = useForm({
         { key: 'paypal_enabled', value: getSettingValue('paypal_enabled') === '1' || getSettingValue('paypal_enabled') === 'true' }, // Boolean
         { key: 'bank_transfer_enabled', value: getSettingValue('bank_transfer_enabled') === '1' || getSettingValue('bank_transfer_enabled') === 'true' }, // Boolean
         { key: 'bank_details_text', value: getSettingValue('bank_details_text') || '' }, // Text
+        { key: 'exchange_rate', value: getSettingValue('exchange_rate') || '20.00' }, // Numeric
     ]
 });
 
@@ -83,6 +84,27 @@ const submit = () => {
                             placeholder="Ingrese los datos de la cuenta bancaria aquí..."
                         ></textarea>
                          <p class="text-sm text-secondary-500 mt-1">Este texto aparecerá en los correos de confirmación.</p>
+                    </div>
+
+                    <!-- Exchange Rate -->
+                    <div>
+                        <label class="block font-medium text-secondary-900 dark:text-white mb-2">Tipo de Cambio (USD a MXN)</label>
+                        <div class="relative rounded-md shadow-sm w-full sm:w-1/3">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                <span class="text-gray-500 sm:text-sm">$</span>
+                            </div>
+                            <input 
+                                type="number" 
+                                v-model="form.settings[3].value"
+                                step="0.01"
+                                class="block w-full rounded-md border-primary-300 dark:border-secondary-700 dark:bg-secondary-800 dark:text-white pl-7 focus:border-primary-500 focus:ring-primary-500 sm:text-sm" 
+                                placeholder="20.00"
+                            >
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <span class="text-gray-500 sm:text-sm">MXN</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-secondary-500 mt-1">Se utiliza para calcular automáticamente el precio en USD.</p>
                     </div>
 
                     <div class="pt-4 flex justify-end">
