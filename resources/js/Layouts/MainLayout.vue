@@ -103,6 +103,10 @@ watch(() => page.props.flash, (flash) => {
 
 </script>
 
+<script>
+import ChangePasswordModal from '@/Components/ChangePasswordModal.vue';
+</script>
+
 <template>
     <div class="min-h-screen bg-primary-50 dark:bg-secondary-950 font-sans text-secondary-700 dark:text-secondary-200 transition-colors duration-300">
         <!-- Navigation -->
@@ -341,5 +345,6 @@ watch(() => page.props.flash, (flash) => {
                 </div>
             </div>
         </footer>
+        <ChangePasswordModal />
     </div>
 </template>

@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NewPsychologistNotification;
+use App\Mail\PsychologistRegistrationPending;
 
 class CreateNewUser implements CreatesNewUsers
 {
@@ -56,7 +59,7 @@ class CreateNewUser implements CreatesNewUsers
             $creatorId = $adminOptions->id;
         }
 
-        return User::create([
+        $user = User::create([
             'name' => $input['name'],
             'nickname' => $input['nickname'],
             'email' => $input['email'],
@@ -68,5 +71,22 @@ class CreateNewUser implements CreatesNewUsers
             'password' => Hash::make($input['password']),
             'created_by' => $creatorId,
         ]);
+
+        if ($input['role'] === 'psychologist') {
+            // Notify Yuliana and Super Admin
+            $admins = User::whereIn('role', ['admin', 'titular'])->get();
+            // Also include specific email if not found in roles (fallback)
+            $specificAdmin = User::where('email', 'juliana@therapy.app')->first();
+            $recipients = $admins->merge([$specificAdmin])->filter()->unique('id');
+
+            foreach ($recipients as $recipient) {
+                Mail::to($recipient)->send(new NewPsychologistNotification($user));
+            }
+
+            // Notify the new Psychologist
+            Mail::to($user)->send(new PsychologistRegistrationPending($user));
+        }
+
+        return $user;
     }
 }

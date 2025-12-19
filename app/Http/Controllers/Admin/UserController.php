@@ -10,6 +10,9 @@ use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Validation;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PsychologistAccountApproved;
+use App\Mail\PsychologistAccountDenied;
 
 class UserController extends Controller
 {
@@ -128,6 +131,7 @@ class UserController extends Controller
             'gender' => $validated['gender'] ?? null,
             'is_approved' => true,
             'created_by' => $creator->id,
+            'must_change_password' => true, // Force password change on first login
         ]);
 
         // Send Email Verification
@@ -195,6 +199,15 @@ class UserController extends Controller
         $user->update([
             'is_approved' => !$user->is_approved
         ]);
+
+        // Send Notification if Psychologist
+        if ($user->role === 'psychologist') {
+            if ($user->is_approved) {
+                Mail::to($user)->send(new PsychologistAccountApproved($user));
+            } else {
+                Mail::to($user)->send(new PsychologistAccountDenied($user));
+            }
+        }
 
         $status = $user->is_approved ? 'activado' : 'desactivado';
         return back()->with('success', "El usuario ha sido {$status}.");
