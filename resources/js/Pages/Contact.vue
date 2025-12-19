@@ -1,11 +1,16 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import { Head } from '@inertiajs/vue3';
 
 const page = usePage();
 const user = page.props.auth.user;
+
+const props = defineProps({
+    psychologists: Array,
+    assignedPsychologistId: Number,
+});
 
 const form = useForm({
     name: user ? user.name : '',
@@ -14,6 +19,14 @@ const form = useForm({
     subject: '',
     message: '',
     use_nickname: false,
+    psychologist_id: '',
+});
+
+onMounted(() => {
+    // Auto-select assigned psychologist if present
+    if (props.assignedPsychologistId) {
+        form.psychologist_id = props.assignedPsychologistId;
+    }
 });
 
 const submit = () => {
@@ -139,6 +152,26 @@ const submit = () => {
                                             rows="4"
                                         ></textarea>
                                         <p v-if="form.errors.message" class="text-sm text-red-600 dark:text-red-400 mt-1">{{ form.errors.message }}</p>
+                                    </div>
+
+                                    <!-- Psychologist Selection -->
+                                    <div>
+                                        <label for="psychologist_id" class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
+                                            Seleccionar Psicólogo
+                                            <span v-if="!user" class="text-xs text-secondary-500">(Opcional - Se asignará un administrador si se deja vacío)</span>
+                                             <span v-else-if="assignedPsychologistId" class="text-xs text-primary-600">(Tu psicólogo asignado está preseleccionado)</span>
+                                        </label>
+                                        <select
+                                            id="psychologist_id"
+                                            v-model="form.psychologist_id"
+                                            class="w-full rounded-lg border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700 dark:text-white focus:border-primary-500 focus:ring-primary-500"
+                                        >
+                                            <option value="">Psic. Yuliana Sanchez Navarrete</option>
+                                            <option v-for="psych in psychologists" :key="psych.id" :value="psych.id">
+                                                {{ psych.name }} {{ psych.nickname ? `(${psych.nickname})` : '' }}
+                                            </option>
+                                        </select>
+                                        <p v-if="form.errors.psychologist_id" class="text-sm text-red-600 dark:text-red-400 mt-1">{{ form.errors.psychologist_id }}</p>
                                     </div>
 
                                     <div class="flex items-center justify-end mt-4">

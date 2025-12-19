@@ -19,6 +19,9 @@
     },
     "dependencies": {
         "@inertiajs/vue3": "^2.2.18",
+        "@tiptap/extension-image": "^3.13.0",
+        "@tiptap/starter-kit": "^3.13.0",
+        "@tiptap/vue-3": "^3.13.0",
         "laravel-vue-i18n": "^2.8.0",
         "lodash": "^4.17.21",
         "pinia": "^3.0.4",

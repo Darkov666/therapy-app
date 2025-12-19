@@ -17,6 +17,9 @@ class BlogPost extends Model
         'read_time',
         'is_published',
         'published_at',
+        'visibility',
+        'user_id',
+        'topic_id',
     ];
 
     protected $casts = [

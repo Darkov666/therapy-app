@@ -9,7 +9,7 @@
         "login": "Iniciar Sesión"
     },
     "hero": {
-        "title": "Encuentra tu Equilibrio.\nSana tu Mente. (PRUEBA)",
+        "title": "Encuentra tu Equilibrio.\nSana tu Mente.",
         "subtitle": "Servicios de terapia profesional adaptados a tu viaje único. Brindamos un espacio seguro para el crecimiento, la curación y el autodescubrimiento.",
         "cta_services": "Ver Servicios",
         "cta_contact": "Contáctanos",
@@ -36,20 +36,20 @@
         "no_products": "No se encontraron productos en esta categoría."
     },
     "philosophy": {
-        "title": "Tu Paz es Nuestra Prioridad",
-        "p1": "Creemos que la salud mental es tan importante como la salud física. Nuestro enfoque se basa en la empatía, el respeto y las prácticas basadas en la evidencia.",
-        "p2": "Ya sea que estés lidiando con ansiedad, problemas de relación o simplemente necesites alguien con quien hablar, estamos aquí para apoyarte en cada paso del camino."
+        "title": "Nuestra Filosofía",
+        "p1": "En Conecta Contigo, creemos que cada individuo tiene la capacidad innata de sanar y crecer. Nuestro enfoque terapéutico es integrador y humanista, centrándose en el bienestar emocional y mental de cada persona.",
+        "p2": "Ofrecemos un espacio seguro, confidencial y libre de juicios donde puedes explorar tus pensamientos y sentimientos. Trabajamos contigo para desarrollar herramientas prácticas y estrategias personalizadas que te permitan enfrentar los desafíos de la vida con resiliencia y confianza."
     },
     "gallery": {
-        "title": "Nuestra Galería",
-        "subtitle": "Un vistazo a nuestros espacios y actividades.",
-        "individual": "Terapia Individual",
-        "group": "Terapia en Grupo",
-        "workshops": "Talleres",
-        "conferences": "Conferencias",
-        "trainings": "Capacitaciones",
-        "talks": "Pláticas",
-        "presentations": "Ponencias"
+        "title": "Espacios de Sanación",
+        "subtitle": "Conoce nuestras instalaciones diseñadas para tu comodidad y tranquilidad.",
+        "individual": "Consultorio Individual",
+        "group": "Sala de Terapia Grupal",
+        "workshops": "Área de Talleres",
+        "conferences": "Auditorio",
+        "trainings": "Sala de Capacitación",
+        "talks": "Espacio de Pláticas",
+        "presentations": "Sala de Presentaciones"
     },
     "blog": {
         "title": "Lo Último del Blog",

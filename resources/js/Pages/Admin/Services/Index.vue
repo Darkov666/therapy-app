@@ -75,7 +75,7 @@ const formatCurrency = (amount, currency = 'MXN') => {
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Imagen</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Servicio</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Vendedor</th> (<!-- NEW -->)
+                            <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Vendedor</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Categoría</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Precio</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Tipo</th>

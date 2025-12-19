@@ -10,19 +10,35 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
+// Explicit imports moved to resolve function
+
 createInertiaApp({
     resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
     setup({ el, App, props, plugin }) {
-        return createApp({ render: () => h(App, props) })
-            .use(plugin)
-            .use(ZiggyVue)
-            .use(pinia)
-            .use(i18nVue, {
-                resolve: async lang => {
-                    const langs = import.meta.glob('./lang/*.json');
+
+        const app = createApp({ render: () => h(App, props) });
+
+        // .use(plugin) // Intertia plugin - required for page render, keep it.
+        // .use(ZiggyVue) // Commented out
+        // .use(pinia)    // Commented out
+
+        app.use(plugin);
+        app.use(ZiggyVue);
+        app.use(pinia);
+
+        app.use(i18nVue, {
+            lang: props.initialPage.props.locale || 'es',
+            resolve: async lang => {
+                const langs = import.meta.glob('./lang/*.json');
+                if (langs[`./lang/${lang}.json`]) {
                     return await langs[`./lang/${lang}.json`]();
                 }
-            })
-            .mount(el);
+                return {};
+            },
+        });
+
+        app.mount(el);
+        return app;
     },
 });
+

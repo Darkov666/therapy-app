@@ -15,7 +15,23 @@ class ContactController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Contact');
+        $user = Auth::user();
+
+        // Fetch Psychologists for Dropdown
+        // Logic: All psychologists + Titulars
+        $psychologists = \App\Models\User::whereIn('role', ['psychologist', 'titular'])
+            ->select('id', 'name', 'nickname')
+            ->get();
+
+        $assignedPsychologistId = null;
+        if ($user && $user->created_by) {
+            $assignedPsychologistId = $user->created_by;
+        }
+
+        return Inertia::render('Contact', [
+            'psychologists' => $psychologists,
+            'assignedPsychologistId' => $assignedPsychologistId
+        ]);
     }
 
     public function store(Request $request)
@@ -27,6 +43,7 @@ class ContactController extends Controller
             'subject' => 'required|string|max:255',
             'message' => 'required|string',
             'use_nickname' => 'boolean',
+            'psychologist_id' => 'nullable|exists:users,id',
         ]);
 
         $user = Auth::user();
@@ -35,42 +52,47 @@ class ContactController extends Controller
                 ? $user->nickname
                 : $user->name;
         } else {
-            $name = $request->input('name');
-            if (!$name) {
-                // Should be required if not auth, but validation above is nullable. 
-                // Let's refine validation rule dynamically or just generic check.
-                // Actually better to enforce validaiton rule based on auth status in real app, 
-                // but for now I'll just default to 'Guest' or fail if empty? 
-                // The request requirement says "solicitar nombre...".
-                // I will fix validation logic below.
-            }
+            $name = $request->input('name') ?? 'Guest';
         }
 
-        // Refined validation logic
         if (!$user && empty($request->name)) {
             return back()->withErrors(['name' => 'The name field is required.']);
         }
 
         $contactMessage = ContactMessage::create([
             'user_id' => $user ? $user->id : null,
-            'name' => $name ?? $request->name,
+            'name' => $name,
             'email' => $request->email,
             'phone' => $request->phone,
             'subject' => $request->subject,
             'message' => $request->message,
+            // We could store the target psychologist_id in the message model if we added a migration, 
+            // but for now we just route the email.
         ]);
+
+        // Email Routing Logic
+        $recipientEmail = 'juliana@therapy.app'; // Default Admin
+
+        if ($request->filled('psychologist_id')) {
+            $psychologist = \App\Models\User::find($request->psychologist_id);
+            if ($psychologist) {
+                $recipientEmail = $psychologist->email;
+            }
+        } elseif ($user && $user->creator) {
+            // Fallback to assigned psychologist if logged in
+            $recipientEmail = $user->creator->email;
+        }
+        // Logic for "Route Context" (subdomain/path) would go here if we had the context passed in request.
+        // For now, defaulting to Admin if no selection and no creator.
 
         // Send Emails
         // To Client
         Mail::to($contactMessage->email)->send(new ContactConfirmationMail($contactMessage));
 
-        // To Psychologist (Admin/Titular) - assuming hardcoded or specific setting? 
-        // User request: "al psicologo". I'll send to a configured admin email or the first admin found.
-        // For now I'll use a placeholder or config.
-        $adminEmail = 'juliana@therapy.app';
-        Mail::to($adminEmail)->send(new NewContactMessageMail($contactMessage));
+        // To Selected Psychologist / Admin
+        Mail::to($recipientEmail)->send(new NewContactMessageMail($contactMessage));
 
-        return back()->with('success', 'Message sent successfully. We will contact you shortly.');
+        return back()->with('success', 'Message sent successfully.');
     }
 
     public function reply(Request $request, ContactMessage $message)

@@ -16,6 +16,18 @@ class BlogController extends Controller
         $query = BlogPost::with(['topic', 'author'])
             ->where('is_published', true);
 
+        // Visibility Filter
+        $user = Auth::user();
+        if (!$user) {
+            $query->where('visibility', 'public');
+        } elseif ($user->role === 'psychologist' || $user->role === 'titular' || $user->role === 'admin') {
+            // Psychologists see all (public, auth, psychologist)
+            // No additional filter needed as they see everything
+        } else {
+            // Authenticated (Patients) see public and auth
+            $query->whereIn('visibility', ['public', 'auth']);
+        }
+
         // Filter by Topic
         if ($request->has('topic') && $request->topic !== 'all') {
             $query->whereHas('topic', function ($q) use ($request) {
@@ -53,6 +65,17 @@ class BlogController extends Controller
             ->where('slug', $slug)
             ->where('is_published', true)
             ->firstOrFail();
+
+        // Check Visibility
+        $user = Auth::user();
+        if ($post->visibility === 'auth' && !$user) {
+            abort(403, 'Debes iniciar sesión para ver esta entrada.');
+        }
+        if ($post->visibility === 'psychologist') {
+            if (!$user || !in_array($user->role, ['psychologist', 'titular', 'admin', 'root'])) {
+                abort(403, 'Esta entrada es exclusiva para psicólogos.');
+            }
+        }
 
         $post->loadCount(['likes', 'comments']);
 

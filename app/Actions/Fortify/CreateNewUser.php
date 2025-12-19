@@ -47,6 +47,15 @@ class CreateNewUser implements CreatesNewUsers
             $photoPath = $input['photo']->store('profile-photos', 'public');
         }
 
+        // Identify creator/owner
+        $creatorId = null;
+        // Default to Main Admin for main page registrations
+        // We look for the "Titular" / Admin defined in seeder
+        $adminOptions = User::where('email', 'juliana@therapy.app')->orWhere('role', 'admin')->first();
+        if ($adminOptions) {
+            $creatorId = $adminOptions->id;
+        }
+
         return User::create([
             'name' => $input['name'],
             'nickname' => $input['nickname'],
@@ -57,6 +66,7 @@ class CreateNewUser implements CreatesNewUsers
             'is_approved' => $input['role'] === 'psychologist' ? false : true,
             'profile_photo_path' => $photoPath,
             'password' => Hash::make($input['password']),
+            'created_by' => $creatorId,
         ]);
     }
 }

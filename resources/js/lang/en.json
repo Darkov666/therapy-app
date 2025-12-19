@@ -36,17 +36,17 @@
         "no_products": "No products found in this category."
     },
     "philosophy": {
-        "title": "Your Peace is Our Priority",
-        "p1": "We believe that mental health is just as important as physical health. Our approach is rooted in empathy, respect, and evidence-based practices.",
-        "p2": "Whether you are dealing with anxiety, relationship issues, or just need someone to talk to, we are here to support you every step of the way."
+        "title": "Our Philosophy",
+        "p1": "At Conecta Contigo, we believe that every individual has the innate capacity to heal and grow. Our therapeutic approach is integrative and humanistic, focusing on the emotional and mental well-being of each person.",
+        "p2": "We offer a safe, confidential, and judgment-free space where you can explore your thoughts and feelings. We work with you to develop practical tools and personalized strategies that empower you to face life's challenges with resilience and confidence."
     },
     "gallery": {
-        "title": "Our Gallery",
-        "subtitle": "A glimpse into our spaces and activities.",
-        "individual": "Individual Therapy",
-        "group": "Group Therapy",
-        "workshops": "Workshops",
-        "conferences": "Conferences"
+        "title": "Healing Spaces",
+        "subtitle": "Discover our facilities designed for your comfort and tranquility.",
+        "individual": "Individual Office",
+        "group": "Group Therapy Room",
+        "workshops": "Workshop Area",
+        "conferences": "Auditorium"
     },
     "blog": {
         "title": "Latest from the Blog",

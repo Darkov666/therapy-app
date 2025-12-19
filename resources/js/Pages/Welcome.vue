@@ -4,7 +4,6 @@ import { Head, Link } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import GallerySection from '@/Components/GallerySection.vue';
 import ServiceCard from '@/Components/ServiceCard.vue';
-import { wTrans } from 'laravel-vue-i18n';
 
 defineProps({
     featuredServices: Array,
@@ -59,6 +58,8 @@ const galleryCategories = [
 
 <template>
     <Head title="Welcome" />
+
+
 
     <MainLayout>
         <!-- Hero Section -->

@@ -29,6 +29,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'gender',
         'profile_photo_path',
         'is_approved',
+        'can_blog',
     ];
 
     /**
@@ -51,6 +52,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'can_blog' => 'boolean',
+            'is_approved' => 'boolean',
         ];
     }
     protected $appends = [

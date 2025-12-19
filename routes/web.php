@@ -119,6 +119,10 @@ Route::middleware([
         Route::resource('services', App\Http\Controllers\Admin\ServiceController::class);
         Route::resource('products', App\Http\Controllers\Admin\ProductController::class);
         Route::resource('categories', App\Http\Controllers\Admin\CategoryController::class)->except(['create', 'edit', 'show']);
+
+        // Blog Management
+        Route::post('blog/upload-image', [App\Http\Controllers\Admin\BlogController::class, 'uploadEditorImage'])->name('blog.upload-image');
+        Route::resource('blog', App\Http\Controllers\Admin\BlogController::class);
     });
 
     // Titular Routes
