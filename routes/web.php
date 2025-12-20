@@ -110,6 +110,9 @@ Route::middleware([
             Route::get('/settings', [App\Http\Controllers\Admin\AdminController::class, 'settings'])->name('settings');
             Route::put('/settings', [App\Http\Controllers\Admin\AdminController::class, 'updateSettings'])->name('settings.update');
             Route::put('users/{user}/approve', [App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.approve');
+
+            // System Documentation
+            Route::get('/documentation', [App\Http\Controllers\Admin\DocumentationController::class, 'index'])->name('documentation');
         });
 
         // User Management
